@@ -1,0 +1,17 @@
+FROM debian:bullseye
+
+RUN apt-get update && apt-get install -y apache2 php libapache2-mod-php
+
+WORKDIR /var/www/html
+
+# Supprimer le fichier index.html par défaut d'Apache
+RUN rm index.html 
+
+COPY src/index.html .
+COPY src/index.php .
+
+COPY src/start.sh /start.sh
+
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
