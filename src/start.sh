@@ -16,6 +16,7 @@ if [ "$INDEX" = "1" ]; then
 
     rm -f /var/www/html/index.php
     rm -rf /var/www/html/phpmyadmin
+    rm -rf /var/www/html/wordpress
 
     # On modifie la configuration d'Apache pour activer les Indexes
     sed -i "s/Indexes//g" /etc/apache2/apache2.conf
