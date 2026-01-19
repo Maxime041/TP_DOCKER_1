@@ -1,15 +1,16 @@
 FROM debian:bullseye
 
-RUN apt-get update && apt-get install -y apache2 php libapache2-mod-php
+RUN apt-get update && apt-get install -y apache2 php libapache2-mod-php mariadb-server php-mysql php-mbstring php-zip php-gd wget unzip
 
 WORKDIR /var/www/html
 
 # Supprimer le fichier index.html par défaut d'Apache
 RUN rm index.html 
 
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip && unzip phpMyAdmin-5.2.1-all-languages.zip && mv phpMyAdmin-5.2.1-all-languages phpmyadmin && rm phpMyAdmin-5.2.1-all-languages.zip
+
 COPY src/index.html .
 COPY src/index.php .
-
 COPY src/start.sh /start.sh
 
 RUN chmod +x /start.sh
