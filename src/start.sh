@@ -1,28 +1,24 @@
 #!/bin/bash
 
-echo "ServerName localhost" >> /etc/apache2/apache2.conf
-
 service mariadb start
 
 sleep 2
 echo "Création de la base et de l'utilisateur..."
-echo "CREATE DATABASE wordpress;" | mariadb -u root
-echo "CREATE USER 'maximetest'@'localhost' IDENTIFIED BY 'secret';" | mariadb -u root
+echo "CREATE DATABASE IF NOT EXISTS wordpress;" | mariadb -u root
+echo "CREATE USER IF NOT EXISTS 'maximetest'@'localhost' IDENTIFIED BY 'secret';" | mariadb -u root
 echo "GRANT ALL PRIVILEGES ON *.* TO 'maximetest'@'localhost';" | mariadb -u root
 echo "FLUSH PRIVILEGES;" | mariadb -u root
 
 if [ "$INDEX" = "1" ]; then
-    echo "Mode INDEX=1 ACTIVÉ"
-
-    rm -f /var/www/html/index.php
-    rm -rf /var/www/html/phpmyadmin
-    rm -rf /var/www/html/wordpress
-
-    # On modifie la configuration d'Apache pour activer les Indexes
-    sed -i "s/Indexes//g" /etc/apache2/apache2.conf
+    echo "Autoindex : DÉSACTIVÉ (INDEX=1)"
+    sed -i 's/autoindex on;/autoindex off;/g' /etc/nginx/sites-available/default
+    sed -i "2i header('Location: /index.html'); exit;" /var/www/html/wordpress/index.php
+    sed -i "2i header('Location: /index.html'); exit;" /var/www/html/phpmyadmin/index.php
+    sed -i "2i header('Location: /index.html'); exit;" /var/www/html/index.php
+    sed -i '2i <meta http-equiv="refresh" content="0;url=/index.html" />' /var/www/html/index.nginx-debian.html
 fi
 
-rm -f /var/run/apache2/apache2.pid
+service php7.4-fpm start
 
-echo "Lancement d'Apache..."
-apachectl -D FOREGROUND
+echo "Lancement de Nginx..."
+nginx -g 'daemon off;'

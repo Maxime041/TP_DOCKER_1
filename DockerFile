@@ -1,18 +1,20 @@
 FROM debian:bullseye
 
-RUN apt-get update && apt-get install -y apache2 php libapache2-mod-php mariadb-server php-mysql php-mbstring php-zip php-gd wget unzip
+RUN apt-get update && apt-get install -y nginx mariadb-server php-fpm php-mysql php-mbstring php-zip php-gd wget unzip openssl
 
 WORKDIR /var/www/html
 
-# Supprimer le fichier index.html par défaut d'Apache
-RUN rm index.html 
-
+RUN mkdir /etc/nginx/ssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=FR/ST=PACA/L=Nice/O=42/OU=Student/CN=localhost"
 RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip && unzip phpMyAdmin-5.2.1-all-languages.zip && mv phpMyAdmin-5.2.1-all-languages phpmyadmin && rm phpMyAdmin-5.2.1-all-languages.zip
 RUN wget https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz && rm latest.tar.gz && chown -R www-data:www-data /var/www/html
 
+COPY src/nginx.conf /etc/nginx/sites-available/default
 COPY src/index.html .
 COPY src/index.php .
 COPY src/start.sh /start.sh
+
+EXPOSE 80 
+EXPOSE 443
 
 RUN chmod +x /start.sh
 
